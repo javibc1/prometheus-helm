@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: snmp-exporter
+  name: snmp-exporter
+  namespace: integraciones
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 3
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: snmp-exporter
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: snmp-exporter
+    spec:
+      containers:
+      - image:  "{{ .Values.exporter.image.repository }}:{{ .Values.exporter.image.tag }}"
+        imagePullPolicy: "{{ .Values.adapter.image.pullPolicy }}"
+        name: snmp-exporter
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        ports:
+        - containerPort: 9116
+          name: http
+          protocol: TCP
+      dnsPolicy: ClusterFirst
+      schedulerName: default-scheduler
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
